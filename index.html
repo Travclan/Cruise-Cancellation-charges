@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cruise Cancellation Charges Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: "📊";
+            margin-right: 8px;
+        }
+        
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .input-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 500;
+            color: #34495e;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        input {
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .readonly {
+            background-color: #f1f3f4;
+            color: #5f6368;
+        }
+        
+        .calculate-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+        }
+        
+        .results-section {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+        
+        .results-section .section-title::before {
+            content: "💰";
+        }
+        
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .result-label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            font-size: 18px;
+            color: #e74c3c;
+        }
+        
+        .cancellation-rules {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .cancellation-rules h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .rule-item {
+            padding: 8px 0;
+            border-bottom: 1px dotted #ddd;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .rule-item:last-child {
+            border-bottom: none;
+        }
+        
+
+        
+        @media (max-width: 768px) {
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚢 Cruise Cancellation Calculator</h1>
+            <p>Calculate cancellation charges based on days remaining</p>
+        </div>
+        
+        <div class="content">
+            <!-- Cancellation Rules Display -->
+            <div class="cancellation-rules">
+                <h3>📋 Current Cancellation Rules</h3>
+                <div id="rulesDisplay"></div>
+            </div>
+            
+            <!-- Input Section -->
+            <div class="form-section">
+                <div class="section-title">Booking Details</div>
+                
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="costPrice">Cost Price (₹)</label>
+                        <input type="number" id="costPrice" placeholder="Enter total cost">
+                    </div>
+                    <div class="input-field">
+                        <label for="amountPending">Amount Pending (₹)</label>
+                        <input type="number" id="amountPending" placeholder="Amount still not received">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="amountReceived">Amount Received (₹)</label>
+                        <input type="number" id="amountReceived" placeholder="Auto-calculated" class="readonly" readonly>
+                    </div>
+                    <div class="input-field">
+                        <label for="travelDate">Date of Travel</label>
+                        <input type="date" id="travelDate">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="todayDate">Today's Date</label>
+                        <input type="date" id="todayDate" class="readonly" readonly>
+                    </div>
+                    <div class="input-field">
+                        <label for="daysToTravel">Days to Travel</label>
+                        <input type="number" id="daysToTravel" placeholder="Auto-calculated" class="readonly" readonly>
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateCharges()">🧮 Calculate Cancellation Charges</button>
+            </div>
+            
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="section-title">Calculation Results</div>
+                
+                <div class="result-item">
+                    <span class="result-label">Cancellation Percentage:</span>
+                    <span class="result-value" id="cancellationPercent">0%</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Cancellation Charges (₹):</span>
+                    <span class="result-value" id="cancellationCharges">₹0</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Cancellation We Are In (₹):</span>
+                    <span class="result-value" id="cancellationWeAreIn">₹0</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Amount Needed as per Days (₹):</span>
+                    <span class="result-value" id="amountNeeded">₹0</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Amount We Have According to Days (₹):</span>
+                    <span class="result-value" id="amountWeHave">₹0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fixed cancellation rules
+        const cancellationRules = [
+            { minDays: 91, maxDays: Infinity, percentage: 0, description: "91 days or more - No Cancellation" },
+            { minDays: 49, maxDays: 90, percentage: 30, description: "90 to 49 days - 30% Charges" },
+            { minDays: 33, maxDays: 48, percentage: 50, description: "48 to 33 days - 50% Charges" },
+            { minDays: 19, maxDays: 32, percentage: 75, description: "32 to 19 days - 75% Charges" },
+            { minDays: 0, maxDays: 18, percentage: 100, description: "18 days or less - 100% Charges" }
+        ];
+
+        // Initialize the page
+        function initializePage() {
+            // Set today's date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('todayDate').value = today;
+            
+            // Display rules
+            displayRules();
+            
+            // Add event listeners - FLIPPED LOGIC
+            document.getElementById('costPrice').addEventListener('input', calculateReceived);
+            document.getElementById('amountPending').addEventListener('input', calculateReceived);
+            document.getElementById('travelDate').addEventListener('change', calculateDaysToTravel);
+            document.getElementById('todayDate').addEventListener('change', calculateDaysToTravel);
+        }
+
+        // NEW FUNCTION: Calculate Amount Received from Cost Price and Amount Pending
+        function calculateReceived() {
+            const costPrice = parseFloat(document.getElementById('costPrice').value) || 0;
+            const amountPending = parseFloat(document.getElementById('amountPending').value) || 0;
+            const amountReceived = costPrice - amountPending;
+            document.getElementById('amountReceived').value = amountReceived >= 0 ? amountReceived : 0;
+        }
+
+        function calculateDaysToTravel() {
+            const travelDate = new Date(document.getElementById('travelDate').value);
+            const todayDate = new Date(document.getElementById('todayDate').value);
+            
+            if (travelDate && todayDate) {
+                const timeDiff = travelDate.getTime() - todayDate.getTime();
+                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                document.getElementById('daysToTravel').value = daysDiff >= 0 ? daysDiff : 0;
+            }
+        }
+
+        function getCancellationPercentage(days) {
+            for (let rule of cancellationRules) {
+                if (days >= rule.minDays && days <= rule.maxDays) {
+                    return rule.percentage;
+                }
+            }
+            return 100; // Default to 100% if no rule matches
+        }
+
+        function calculateCharges() {
+            const costPrice = parseFloat(document.getElementById('costPrice').value) || 0;
+            const amountReceived = parseFloat(document.getElementById('amountReceived').value) || 0;
+            const daysToTravel = parseInt(document.getElementById('daysToTravel').value) || 0;
+            
+            if (costPrice === 0) {
+                alert('Please enter the cost price');
+                return;
+            }
+            
+            // Calculate cancellation percentage
+            const cancellationPercent = getCancellationPercentage(daysToTravel);
+            
+            // Calculate cancellation charges
+            const cancellationCharges = (costPrice * cancellationPercent) / 100;
+            
+            // Cancellation we are in = Cancellation charges - Amount received
+            const cancellationWeAreIn = cancellationCharges - amountReceived;
+            
+            // Amount needed as per days = Amount needed to avoid cancellation charges
+            // This is the total amount customer needs to pay to avoid any cancellation
+            const amountNeeded = costPrice - amountReceived;
+            
+            // Amount we have according to days (what we can keep)
+            const amountWeHave = Math.min(amountReceived, costPrice - cancellationCharges);
+            
+            // Display results
+            document.getElementById('cancellationPercent').textContent = cancellationPercent + '%';
+            document.getElementById('cancellationCharges').textContent = '₹' + cancellationCharges.toLocaleString();
+            document.getElementById('cancellationWeAreIn').textContent = '₹' + Math.max(0, cancellationWeAreIn).toLocaleString();
+            document.getElementById('amountNeeded').textContent = '₹' + Math.max(0, amountNeeded).toLocaleString();
+            document.getElementById('amountWeHave').textContent = '₹' + amountWeHave.toLocaleString();
+            
+            // Show results section
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayRules() {
+            const rulesDisplay = document.getElementById('rulesDisplay');
+            rulesDisplay.innerHTML = '';
+            
+            // Display rules in order
+            cancellationRules.forEach(rule => {
+                const ruleDiv = document.createElement('div');
+                ruleDiv.className = 'rule-item';
+                ruleDiv.innerHTML = `
+                    <span>${rule.description}</span>
+                    <span><strong>${rule.percentage}%</strong></span>
+                `;
+                rulesDisplay.appendChild(ruleDiv);
+            });
+        }
+
+        // Initialize the page when loaded
+        window.onload = initializePage;
+    </script>
+</body>
+</html>
